@@ -1,0 +1,14 @@
+
+***  README *** 
+
+ This is the start of a very simple Python text editor using curses. 
+
+ Acknowledgement - This code is based on the code for the great little 
+ app that David Mertz did for his "Charming Python - curses programming" column 
+ Here is the link to that - 
+ http://www.ibm.com/developerworks/linux/library/l-python6.html 
+ 
+ As usual, this is public-domain... "share and enjoy....."  :)  
+- mooseman 
+
+ 
