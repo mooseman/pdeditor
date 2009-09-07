@@ -1,11 +1,7 @@
 
 
 #  pdspread.py  
-#  A simple Python spreadsheet using curses.  
-#  Acknowledgement - This app was inspired by David Mertz's 
-#  txt2HTML curses-based utility in his "Charming Python" column 
-#  (installment 6). A lot of code from that application is used here. 
-
+#  A simple Python spreadsheet using curses.   
 #  This code is released to the public domain. 
 
 
