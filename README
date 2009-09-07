@@ -2,13 +2,30 @@
 ***  README *** 
 
  This is the start of a very simple Python text editor using curses. 
+ Still very pre-alpha. At present, it is just a very simple textpad object. 
+ It will soon be developed further.     
 
- Acknowledgement - This code is based on the code for the great little 
- app that David Mertz did for his "Charming Python - curses programming" column 
- Here is the link to that - 
- http://www.ibm.com/developerworks/linux/library/l-python6.html 
+ The key-bindings ( from the "curses" page of the Python docs - ) 
+ http://docs.python.org/library/curses.html -  
+  
+Keystroke 	Action
+Control-A 	Go to left edge of window.
+Control-B 	Cursor left, wrapping to previous line if appropriate.
+Control-D 	Delete character under cursor.
+Control-E 	Go to right edge (stripspaces off) or end of line (stripspaces on).
+Control-F 	Cursor right, wrapping to next line when appropriate.
+Control-G 	Terminate, returning the window contents.
+Control-H 	Delete character backward.
+Control-J 	Terminate if the window is 1 line, otherwise insert newline.
+Control-K 	If line is blank, delete it, otherwise clear to end of line.
+Control-L 	Refresh screen.
+Control-N 	Cursor down; move down one line.
+Control-O 	Insert a blank line at cursor location.
+Control-P 	Cursor up; move up one line.
+
+Note - To quit the editor, type Control-G twice.    
  
- As usual, this is public-domain... "share and enjoy....."  :)  
+ As usual, the code is public-domain... "share and enjoy....."  :)  
 - mooseman 
 
  
