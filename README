@@ -23,7 +23,7 @@ Control-N 	Cursor down; move down one line.
 Control-O 	Insert a blank line at cursor location.
 Control-P 	Cursor up; move up one line.
 
-Note - To quit the editor, type Control-G twice.    
+Note - To quit the editor, type Control-C.     
  
  As usual, the code is public-domain... "share and enjoy....."  :)  
 - mooseman 
