@@ -85,14 +85,24 @@ def draw():
   # Note - One row is needed for each of the borders, so this cell 
   # is really only one row high and ten columns wide.  
   mywin = curses.newwin(23, 80, y, x) 
-  mywin.box() 
-  mywin.addstr(1, 25, "*** P.D. Editor ***")   
-  mywin.refresh()
-  mywin2 = curses.newwin(21, 76, y+1, x+1)  
+  mywin.box()  
+  mywin.addstr(0, 25, "*** P.D. Editor ***")   
+  mywin.refresh() 
+  mywin2 = mywin.subwin(21, 77, y+1, x+1)  
+  mywin2.setscrreg(1, 20)
   mywin2.refresh() 
   myeditor = curses.textpad.Textbox(mywin2) 
   myeditor.edit() 
-
+  # Get the position of the cursor and see if we need to scroll the 
+  # text. 
+  pos = mywin2.getyx() 
+  if pos[0] >= 20: 
+       mywin2.idlok(1) 
+       mywin2.scrollok(1) 
+       mywin2.scroll(1) 
+  else: 
+       pass         
+    
   
 #-- Top level function call (everything except [curses] setup/cleanup)
 def main(stdscr):
