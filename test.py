@@ -1,10 +1,7 @@
 
 
-#  pdeditor.py 
+#  editor.py 
 #  A small and simple text editor. 
-
-#  This code is released to the public domain.  
-
 
 import sys, curses, curses.wrapper, curses.ascii, curses.textpad, \
    traceback, string, os 
