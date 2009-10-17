@@ -8,12 +8,18 @@
 page-up and page-down, but text now scrolls as expected when 
 you get to the bottom of the page.     
 
+ There are still a few scroll bugs though.  When text scrolls off the page 
+(e.g. off the top), it is not displayed again when you try to scroll back to it. 
+This is in the process of being fixed, using a dictionary that will store the 
+line of text.  
+
  The key-bindings are as follows - 
   
 Keystroke 	Action
 Home  	        Go to left edge of window.
 End  	        Go to right edge of window.
-Control-G 	Exit the editor.  
+Ctrl-A              Print the contents of the data dictionary  
+Ctrl-G 	        Exit the editor.  
 
  
  As usual, the code is public-domain... "share and enjoy....."  :)  
