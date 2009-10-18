@@ -47,21 +47,26 @@ class keyhandler:
     # Save a line of text into the dictionary.    
     def saveline(self): 
        (y, x) = self.scr.getyx()  
+       # Save the line of text
+       self.stuff = self.scr.instr(y,0,len(self.stuff) )  
+       # Remove whitespace from the end of the line 
+       self.stuff = self.stuff.rstrip()  
        self.linedata.append(self.stuff) 
        self.data.update({y: self.linedata})   
        self.stuff = ""  
        self.linedata = [] 
-        
+                                            
     # Trim the line when the backspace key is used              
     def trimline(self): 
        (y, x) = self.scr.getyx() 
-       self.stuff = self.stuff[0:len(self.stuff)-1]  
-              
+       self.scr.move(y, x-1)     
+       self.scr.delch(y, x)   
+                            
     # Remove a character from the line (usually in the middle) 
     def removechar(self): 
-       (y, x) = self.scr.getyx() 
-       self.stuff = self.stuff[0:x-1] + self.stuff[x+1:len(self.stuff)]
-                   
+       (y, x) = self.scr.getyx()    
+       self.scr.delch(y, x)   
+                                     
                                          
     def action(self):  
        while (1): 
@@ -84,17 +89,15 @@ class keyhandler:
                 self.scr.move(y, 0)                             
              self.scr.refresh()   
           elif c==curses.KEY_BACKSPACE:  
-             curses.noecho()           
-             self.scr.move(y, x-1) 
-             (y, x) = self.scr.getyx() 
-             self.trimline()              
-             self.scr.delch(y, x)               
+             curses.noecho() 
+             if x > 0:                  
+                self.trimline()              
+             else: 
+                self.scr.deleteln()                                
              self.scr.refresh()   
           elif c==curses.KEY_DC:  
-             curses.noecho()   
-             (y, x) = self.scr.getyx() 
-             self.removechar()                     
-             self.scr.delch(y, x) 
+             curses.noecho()                
+             self.removechar()                                               
              self.scr.refresh()                                         
           elif c==curses.KEY_UP:  
              curses.noecho()  
@@ -139,7 +142,7 @@ class keyhandler:
           elif c==curses.ascii.SOH: 
              self.display() 
              
-          elif 0<c<256:
+          elif 0<c<256:                                     
              c=chr(c)   
              self.stuff += c                           
              self.scr.refresh()  
