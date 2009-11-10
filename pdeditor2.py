@@ -107,7 +107,7 @@ class keyhandler:
              else:                 
                 self.scr.scroll(-1)         
                 (y, x) = self.scr.getyx()   
-                self.scr.move(self.win_y, x)                
+                self.scr.move(y, x)                
              self.scr.refresh()
           elif c==curses.KEY_DOWN:
              curses.noecho() 
