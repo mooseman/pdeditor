@@ -27,19 +27,14 @@ class keyhandler:
     def __init__(self, scr): 
        self.scr = scr                       
        # Dictionary to store our data in.   
-       self.data = {} 
-              
-       self.prevdata = {}        
-       self.prevstuff = ""    
-       self.stuff = "" 
-       self.nextstuff = ''
+       self.data = {}                      
+       self.stuff = ""        
        # A variable to save the line-number of text. 
        self.win_y = self.win_x = 0  
        # The top line 
        self.topline = 0
        self.bottomline = 23 
-       
-       (self.getbegy, self.getbegx) = self.scr.getbegyx()               
+              
        (self.max_y, self.max_x) = self.scr.getmaxyx()     
        curses.noecho() 
        self.scr.keypad(1)            
@@ -47,29 +42,8 @@ class keyhandler:
        self.scr.idlok(1)  
        self.scr.setscrreg(0, 23)                                
        self.scr.refresh()	    
-       
-    # Override the builtin getyx() function. We will create a function
-    # here which uses FIXED references - in other words, the origin 
-    # does not move (as it does for the built-in func when scrolling is 
-    # used). 
-    # NOTE - when you scroll down past the bottom of the screen, the 
-    # original "origin" scrolls off the top of the screen. So, we need     
-    # to do a function which sets the "screen" origin to (say) 3, 0 
-    # (if you have scrolled 3 lines past the bottom of the screen). 
-                 
-    def getyx(self): 
-       #return (self.win_y, self.win_x)    
-       return str(self.win_y) + "," + str(self.win_x)  
-    
-    # Change the value of self.win_y 
-    # ( we don't really need a corresponding function for win_x ).
-    # Here, we can compare win_y to the "built-in" y, and set win_y 
-    # to zero if we want to.  
-    
-    # Override the built-in wmove (which can be a PITA... ) 
-    def wmove(self): 
-       pass 
-    
+           
+               
     def set_y(self, val): 
        (y, x) = self.scr.getyx() 
        self.win_y += val 
@@ -191,20 +165,13 @@ class keyhandler:
              curses.noecho()                
              self.saveline()               
              if y < self.max_y-1:  
-                self.scr.move(y+1, 0)     
-                self.set_y(1)   
-                self.display()                                                
+                self.scr.move(y+1, 0)                     
              else:                                              
                 self.scr.scroll(1) 
+                self.scr.move(y, 0)                              
                 self.pointtotopline(1) 
-                self.pointtobottomline(1)                 
-                (y, x) = self.scr.getyx() 
-                self.scr.move(y, 0) 
-                #self.scr.mvwin(self.getbegy+1, 0)
-                self.set_y(1)                 
-                self.getbegy+1 
-                self.display()                                                
-                #self.scr.move(y, 0)  
+                self.pointtobottomline(1)                                                 
+             self.set_y(1)                                 
              self.scr.refresh()   
           elif c==curses.KEY_BACKSPACE:  
              curses.noecho() 
@@ -212,48 +179,35 @@ class keyhandler:
                 self.trimline()              
              else: 
                 self.scr.deleteln() 
-                self.set_y(-1) 
-                self.display()                                                                                
+                self.set_y(-1)              
              self.scr.refresh()   
           elif c==curses.KEY_DC:  
              curses.noecho()                
              self.removechar()                                               
              self.scr.refresh()                                         
           elif c==curses.KEY_UP:  
-             curses.noecho() 
-             #self.saveline()                                           
+             curses.noecho()              
              if y > 0:                                   
                 self.scr.move(y-1, x)                    
-                self.set_y(-1)    
-                self.display()                                                             
+                self.set_y(-1)                                                    
              elif y <= 0:   
                 self.scr.scroll(-1)   
-                self.scr.move(y, 0)  
+                self.scr.move(y, x)  
                 self.retrievetop()                               
                 self.pointtotopline(-1)   
-                self.pointtobottomline(-1)               
-                self.display()                                                                                            
+                self.pointtobottomline(-1)                               
              self.scr.refresh()
           elif c==curses.KEY_DOWN:
-             curses.noecho()  
-             #self.saveline()                                                                   
+             curses.noecho()               
              if y < self.max_y - 1:                 
-                self.scr.move(y+1, x) 
-                self.display()                                                
-                self.set_y(1)                 
+                self.scr.move(y+1, x)   
+                self.set_y(1)                                                               
              else:                                          
-                self.scr.scroll(1) 
-                self.retrievebot() 
+                self.scr.scroll(1)                 
+                self.scr.move(y, x)    
+                self.retrievebot()                                              
                 self.pointtotopline(1) 
-                self.pointtobottomline(1) 
-                (y, x) = self.scr.getyx() 
-                self.scr.move(y, x) 
-                self.display()                                                
-                self.set_y(1)                 
-                self.getbegy+1 
-                #self.getline()    
-                #(y, x) = self.scr.getyx()              
-                #self.scr.move(self.win_y, x)  
+                self.pointtobottomline(1)                                                 
              self.scr.refresh()   
           elif c==curses.KEY_LEFT: 
              curses.noecho()           
@@ -271,17 +225,21 @@ class keyhandler:
              curses.noecho() 
              self.scr.move(y, 79) 
              self.scr.refresh() 
+          # If the terminal window is resized, take some action 
+          elif c==curses.KEY_RESIZE: 
+             (y, x) = self.scr.getyx()  
+             (self.max_y, self.max_x) = self.scr.getmaxyx()     
+             self.scr.addstr(y, x, "You resized the terminal!" ) 
+             self.scr.addstr(y+1, x, str("Max row is now " + str(self.max_y) ) ) 
+             self.scr.refresh()     
+                          
+                                       
           # Ctrl-G quits the app                  
           elif c==curses.ascii.BEL: 
              break      
           # Ctrl-A prints the data in the dict 
           elif c==curses.ascii.SOH:              
-             self.displaydict() 
-                          
-          # Ctrl-R prints the screen data    
-          elif c==curses.ascii.DLE: 
-             self.displayscrdata()               
-                          
+             self.displaydict()                           
           elif 0<c<256:               
              c=chr(c)   
              self.stuff += c                           
