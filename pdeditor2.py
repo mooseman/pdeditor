@@ -9,20 +9,8 @@
 import sys, curses, curses.wrapper, curses.ascii, curses.textpad, \
    traceback, string, os 
    
-# Note - Now that we have a dict for the data, we need to display the 
-# data when the user scrolls back to a previously off-screen area. 
-# First, we can test the display of the data using a Ctrl key to print
-# it out.
 
-# Useful stuff for backspace, delete keys 
-# For delete key - need to get the "x" value of the deleted char, then 
-# delete it from the linedata list.  
-# >>> a = ["foobarbaz"]
-# >>> c = a[0][0:len(a[0])-1] 
-# >>> c 
-# 'foobarba'  
-
- 
+#  A class to handle keystrokes  
 class keyhandler:
     def __init__(self, scr): 
        self.scr = scr                       
@@ -42,28 +30,16 @@ class keyhandler:
        self.scr.idlok(1)  
        self.scr.setscrreg(0, 23)                                
        self.scr.refresh()	    
-           
-               
+                          
     def set_y(self, val): 
        (y, x) = self.scr.getyx() 
        self.win_y += val 
                      
-    # TO BE COMLETED 
-    # compare self.win_y and y from self.scr.getyx() 
     def displaydict(self): 
        (y, x) = self.scr.getyx()  
        self.scr.addstr(y, x, str(self.data.items()) )     
        self.scr.refresh() 
-                       
-                                
-    # Display the data in the dictionary 
-    # This happens to be self.stuff.  
-    # NOTE - add test to print hidden data (which has gone off the 
-    # screen). Do this test when you press the up-arrow.  
-    # Something like this - 
-    # if self.data.has_key(self.win_y-1): 
-    #    self.scr.addstr(y, 0, self.data[win_y-1])   
-    
+                                                       
     # A function which points to the "top line" - the one which is 
     # currently at the top of the screen. Each line that the screen 
     # scrolls up will increase this number by 1. Each line scrolled 
@@ -81,28 +57,24 @@ class keyhandler:
        self.myval = self.topline - 1 
        if self.data.has_key(self.myval):  
             self.scr.addstr(y, 0, str(self.data[self.myval] ) )                 
-            #self.scr.addstr(y, 0, self.stuff )                 
        else: 
             pass             
        self.scr.refresh() 
-       
        
     # Retrieve data that has scrolled off the bottom of the screen 
     def retrievebot(self): 
        (y, x) = self.scr.getyx()  
        self.myval = self.bottomline + 1 
        if self.data.has_key(self.myval):  
-            self.scr.addstr(y, 0, str(self.data[self.myval] ) )                 
-            #self.scr.addstr(y, 0, self.stuff )                 
+            self.scr.addstr(y, 0, str(self.data[self.myval] ) )                             
        else: 
             pass             
        self.scr.refresh()     
        
-       
+              
     def display(self): 
        (y, x) = self.scr.getyx()  
-       if self.data.has_key(self.win_y):  
-            #self.scr.addstr(y, 0, str(self.data.values()) )     
+       if self.data.has_key(self.win_y):              
             mystuff = self.stuff + "fooble" 
             self.scr.addstr(y, 0, self.stuff )                 
        else: 
@@ -114,7 +86,8 @@ class keyhandler:
     def saveline(self): 
        (y, x) = self.scr.getyx()  
        # Save the line of text
-       self.stuff = self.scr.instr(y,0,len(self.stuff) )  
+       #self.stuff = self.scr.instr(y,0, len(self.stuff) )  
+       self.stuff = self.scr.instr(y,0, self.max_x )         
        # Remove whitespace from the end of the line 
        self.stuff = self.stuff.rstrip()         
        # Save data to the dict using our win_y as the key. This is 
@@ -122,8 +95,7 @@ class keyhandler:
        # "y" as it is restricted to between 0 and max_y.   
        self.data.update({self.win_y: self.stuff})   
        self.stuff = ""  
-       
-   
+          
     # Get a previously-saved line of text and display it 
     def getline(self):        
        if self.data.has_key(self.win_y): 
@@ -143,8 +115,7 @@ class keyhandler:
           self.scr.delch(y, x)                        
        else: 
           pass           
-                            
-                            
+                                                        
     # Remove a character from the line (usually in the middle) 
     def removechar(self): 
        (y, x) = self.scr.getyx()    
@@ -154,24 +125,21 @@ class keyhandler:
     def action(self):  
        while (1): 
           curses.echo()                 
-          #self.scr.scrollok(1) 
-          #self.scr.idlok(1) 
-          
-          # Get the position of the cursor 
-          (y, x) = self.scr.getyx()            
-       
+          (y, x) = self.scr.getyx()                   
           c=self.scr.getch()		# Get a keystroke               
           if c in (curses.KEY_ENTER, 10):  
              curses.noecho()                
              self.saveline()               
              if y < self.max_y-1:  
                 self.scr.move(y+1, 0)                     
+                self.set_y(1)  
              else:                                              
                 self.scr.scroll(1) 
-                self.scr.move(y, 0)                              
+                self.scr.move(y, 0)   
+                self.set_y(1)  
+                self.retrievebot()                            
                 self.pointtotopline(1) 
-                self.pointtobottomline(1)                                                 
-             self.set_y(1)                                 
+                self.pointtobottomline(1)                                                              
              self.scr.refresh()   
           elif c==curses.KEY_BACKSPACE:  
              curses.noecho() 
@@ -193,6 +161,7 @@ class keyhandler:
              elif y <= 0:   
                 self.scr.scroll(-1)   
                 self.scr.move(y, x)  
+                self.set_y(-1) 
                 self.retrievetop()                               
                 self.pointtotopline(-1)   
                 self.pointtobottomline(-1)                               
@@ -204,7 +173,8 @@ class keyhandler:
                 self.set_y(1)                                                               
              else:                                          
                 self.scr.scroll(1)                 
-                self.scr.move(y, x)    
+                self.scr.move(y, x)  
+                self.set_y(1)   
                 self.retrievebot()                                              
                 self.pointtotopline(1) 
                 self.pointtobottomline(1)                                                 
@@ -232,8 +202,7 @@ class keyhandler:
              self.scr.addstr(y, x, "You resized the terminal!" ) 
              self.scr.addstr(y+1, x, str("Max row is now " + str(self.max_y) ) ) 
              self.scr.refresh()     
-                          
-                                       
+                                                          
           # Ctrl-G quits the app                  
           elif c==curses.ascii.BEL: 
              break      
@@ -250,7 +219,6 @@ class keyhandler:
 def main(stdscr):  
     a = keyhandler(stdscr)      
     a.action() 
-       
                                    
 #  Run the code from the command-line 
 if __name__ == '__main__':  
@@ -271,5 +239,3 @@ if __name__ == '__main__':
      curses.endwin()
      traceback.print_exc()  # Print the exception
 
-
-   
