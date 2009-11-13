@@ -1,17 +1,12 @@
 
 ***  README *** 
 
- This is the start of a very simple Python text editor using curses. 
- Still at around alpha stage.  
+ This is a very simple Python text editor using curses. 
+ It is now at beta stage.  
 
- ** Good news! **  Scrolling now works!   Still have to implement 
+ ** Good news! **  Scrolling now works perfectly!  Still have to implement 
 page-up and page-down, but text now scrolls as expected when 
-you get to the bottom of the page.     
-
- There are still a few scroll bugs though.  When text scrolls off the page 
-(e.g. off the top), it is not displayed again when you try to scroll back to it. 
-This is in the process of being fixed, using a dictionary that will store the 
-line of text.  
+you scroll at the top or bottom of the page.     
 
  The key-bindings are as follows - 
   
