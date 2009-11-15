@@ -12,7 +12,9 @@ class keyhandler:
     def __init__(self, scr): 
        self.scr = scr                       
        # Dictionary to store our data in.   
-       self.data = {}                      
+       self.data = {}           
+       self.indexlist = [] 
+       self.linelist = []            
        self.stuff = ""        
        # A variable to save the line-number of text. 
        self.win_y = self.win_x = 0  
@@ -31,12 +33,21 @@ class keyhandler:
     def set_y(self, val): 
        (y, x) = self.scr.getyx() 
        self.win_y += val 
-                     
+    
+    # Display the stored data in the dict                  
     def displaydict(self): 
        (y, x) = self.scr.getyx()  
        self.scr.addstr(y, x, str(self.data.items()) )     
        self.scr.refresh() 
-                                                       
+            
+    # Display the data in the two lists used to create the dict. 
+    # Not really needed now, but left here for debugging purposes.                 
+    def displaylists(self):             
+       (y, x) = self.scr.getyx()  
+       self.scr.addstr(y, 0, str(self.indexlist) ) 
+       self.scr.addstr(y+1, 0, str(self.linelist) ) 
+       self.scr.refresh()   
+                                                        
     # A function which points to the "top line" - the one which is 
     # currently at the top of the screen. Each line that the screen 
     # scrolls up will increase this number by 1. Each line scrolled 
@@ -72,7 +83,7 @@ class keyhandler:
     def display(self): 
        (y, x) = self.scr.getyx()  
        if self.data.has_key(self.win_y):              
-            mystuff = self.stuff + "fooble" 
+            mystuff = self.stuff 
             self.scr.addstr(y, 0, self.stuff )                 
        else: 
             pass             
@@ -89,10 +100,51 @@ class keyhandler:
        self.stuff = self.stuff.rstrip()         
        # Save data to the dict using our win_y as the key. This is 
        # incremented and decremented as required. We can't just use
-       # "y" as it is restricted to between 0 and max_y.   
-       self.data.update({self.win_y: self.stuff})   
+       # "y" as it is restricted to between 0 and max_y.  
+       self.indexlist.append(self.win_y) 
+       self.linelist.append(self.stuff)  
+       for k, v in zip(self.indexlist, self.linelist): 
+         self.data.update({k: v}) 
+        
+       #self.data.update({self.win_y: self.stuff})   
        self.stuff = ""  
           
+          
+    def insertline(self):
+       self.scr.insertln()  
+       (y, x) = self.scr.getyx()        
+       
+       self.indexlist = []                                 
+       self.linelist.insert(self.win_y, "")  
+       
+       for i, x in enumerate(self.linelist):
+           self.indexlist.insert(i, i)  
+       # Update the data dict 
+       for k, v in zip(self.indexlist, self.linelist): 
+           self.data.update({k: v})      
+       # Increment self.win_y                           
+       self.set_y(1)                                
+       self.scr.refresh() 
+       
+       
+    def deleteline(self): 
+       self.scr.deleteln() 
+       (y, x) = self.scr.getyx()  
+              
+       self.indexlist = []                                 
+       del self.linelist[self.win_y]  
+       
+       for i, x in enumerate(self.linelist):
+           self.indexlist.insert(i, i)  
+       # Update the data dict 
+       for k, v in zip(self.indexlist, self.linelist): 
+           self.data.update({k: v})  
+       self.set_y(-1)                                        
+       # Increment self.win_y                                  
+       self.scr.refresh() 
+       
+       
+                    
     # Get a previously-saved line of text and display it 
     def getline(self):        
        if self.data.has_key(self.win_y): 
@@ -143,7 +195,8 @@ class keyhandler:
              if x > 0:                  
                 self.trimline()              
              else: 
-                self.scr.deleteln() 
+                #self.scr.deleteln() 
+                self.deleteline()
                 self.set_y(-1)              
              self.scr.refresh()   
           elif c==curses.KEY_DC:  
@@ -206,12 +259,10 @@ class keyhandler:
           # F11 here as they are difficult to "intercept". They invoke 
           # already built-in functionality.  
           elif c==curses.KEY_F2: 
-             (y, x) = self.scr.getyx()   
-             self.scr.addstr(y, x, "You pressed F2!" )               
+             self.insertline() 
              self.scr.refresh()  
           elif c==curses.KEY_F3: 
-             (y, x) = self.scr.getyx()   
-             self.scr.addstr(y, x, "You pressed F3!" )               
+             self.deleteline()              
              self.scr.refresh()  
           elif c==curses.KEY_F4: 
              (y, x) = self.scr.getyx()   
@@ -254,8 +305,9 @@ class keyhandler:
           elif c==curses.ascii.BEL: 
              break      
           # Ctrl-A prints the data in the dict 
-          elif c==curses.ascii.SOH:              
-             self.displaydict()                           
+          elif c==curses.ascii.SOH:                               
+             self.displaydict()    
+             #self.displaylists()                        
           elif 0<c<256:               
              c=chr(c)   
              self.stuff += c                           

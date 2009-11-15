@@ -16,7 +16,11 @@ End  	        Go to right edge of window.
 Ctrl-A              Print the contents of the data dictionary  
 Ctrl-G 	        Exit the editor.  
 
- 
+F2                   Insert line 
+F3                   Delete line 
+
+
+
  As usual, the code is public-domain... "share and enjoy....."  :)  
 - mooseman 
 
