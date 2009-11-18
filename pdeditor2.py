@@ -19,15 +19,15 @@ class keyhandler:
        # A variable to save the line-number of text. 
        self.win_y = self.win_x = 0  
        # The top line 
-       self.topline = 0
-       self.bottomline = 23 
-              
-       (self.max_y, self.max_x) = self.scr.getmaxyx()     
+                   
+       (self.max_y, self.max_x) = self.scr.getmaxyx()
+       # Set page size (for page-up and page-down) 
+       self.pagesize = self.max_y-1        
        curses.noecho() 
        self.scr.keypad(1)            
        self.scr.scrollok(1)
        self.scr.idlok(1)  
-       self.scr.setscrreg(0, 23)                                
+       self.scr.setscrreg(0, self.max_y-1)                                
        self.scr.refresh()	    
                           
     def set_y(self, val): 
@@ -41,6 +41,26 @@ class keyhandler:
          + " and y is " + str(y) ) ) 
        self.scr.refresh() 
     
+    # Move to the next line 
+    def nextline(self): 
+       (y, x) = self.scr.getyx() 
+       curses.noecho()                              
+       self.saveline()               
+       if y < self.max_y-1:  
+          self.scr.move(y+1, 0)                     
+          self.set_y(1)  
+       else:                                              
+          self.scr.scroll(1) 
+          self.scr.move(y, 0)   
+          self.set_y(1)  
+          self.retrievedata()          
+       self.scr.refresh()   
+        
+    def test(self): 
+       (y, x) = self.scr.getyx()  
+       self.scr.addstr(y, x, str(self.linelist[y] + str(" ") 
+          + str(self.linelist[self.win_y]) ) ) 
+              
     
     # Display the stored data in the dict                  
     def displaydict(self): 
@@ -53,40 +73,21 @@ class keyhandler:
     def displaylists(self):             
        (y, x) = self.scr.getyx()  
        self.scr.addstr(y, 0, str(self.indexlist) ) 
+       self.set_y(1)
        self.scr.addstr(y+1, 0, str(self.linelist) ) 
+       #self.set_y(1)
        self.scr.refresh()   
                                                         
-    # A function which points to the "top line" - the one which is 
-    # currently at the top of the screen. Each line that the screen 
-    # scrolls up will increase this number by 1. Each line scrolled 
-    # down will decrease it by 1.  
-    def pointtotopline(self, num): 
-       self.topline = self.topline + num   
-       
-    def pointtobottomline(self, num): 
-       self.bottomline = self.bottomline + num        
-       
-           
+                  
     # Retrieve data that has scrolled off the top of the screen 
-    def retrievetop(self): 
-       (y, x) = self.scr.getyx()  
-       self.myval = self.topline - 1 
-       if self.data.has_key(self.myval):  
-            self.scr.addstr(y, 0, str(self.data[self.myval] ) )                 
+    def retrievedata(self): 
+       (y, x) = self.scr.getyx()         
+       if self.data.has_key(self.win_y):  
+            self.scr.addstr(y, 0, str(self.data[self.win_y] ) )                 
        else: 
             pass             
        self.scr.refresh() 
-       
-    # Retrieve data that has scrolled off the bottom of the screen 
-    def retrievebot(self): 
-       (y, x) = self.scr.getyx()  
-       self.myval = self.bottomline + 1 
-       if self.data.has_key(self.myval):  
-            self.scr.addstr(y, 0, str(self.data[self.myval] ) )                             
-       else: 
-            pass             
-       self.scr.refresh()     
-                     
+                            
     # Save a line of text into the dictionary.    
     def saveline(self): 
        (y, x) = self.scr.getyx()  
@@ -95,9 +96,6 @@ class keyhandler:
        self.stuff = self.scr.instr(y,0, self.max_x )         
        # Remove whitespace from the end of the line 
        self.stuff = self.stuff.rstrip()         
-       # Save data to the dict using our win_y as the key. This is 
-       # incremented and decremented as required. We can't just use
-       # "y" as it is restricted to between 0 and max_y. 
        self.indexlist.append(self.win_y) 
        self.linelist.append(self.stuff)         
        for k, v in zip(self.indexlist, self.linelist): 
@@ -105,11 +103,11 @@ class keyhandler:
        # Re-set self.stuff to missing          
        self.stuff = ""  
                     
-    def insertline(self):
+    def insertline(self):  
        self.scr.insertln()  
        (y, x) = self.scr.getyx()               
        self.indexlist = []                                 
-       self.linelist.insert(y, "")         
+       self.linelist.insert(self.win_y, "")         
        for i, x in enumerate(self.linelist):
            self.indexlist.insert(i, i)  
        # Update the data dict 
@@ -121,8 +119,8 @@ class keyhandler:
        # If the line index is not in self.indexlist, just move to the 
        # left-most column and clear to the end of the line
        (y, x) = self.scr.getyx()        
-       if y not in self.indexlist \
-       or y > len(self.indexlist):            
+       if self.win_y not in self.indexlist \
+       or self.win_y > len(self.indexlist):            
           self.scr.move(y, 0) 
           self.scr.clrtoeol() 
           self.scr.refresh() 
@@ -131,7 +129,7 @@ class keyhandler:
           self.scr.deleteln()           
           (y, x) = self.scr.getyx()                
           self.indexlist = []                                 
-          del self.linelist[y]  
+          del self.linelist[self.win_y]  
           for i, x in enumerate(self.linelist):
               self.indexlist.insert(i, i)  
           # Update the data dict 
@@ -162,19 +160,7 @@ class keyhandler:
           (y, x) = self.scr.getyx()   
           c=self.scr.getch()		# Get a keystroke               
           if c in (curses.KEY_ENTER, 10):  
-             curses.noecho()                
-             self.saveline()               
-             if y < self.max_y-1:  
-                self.scr.move(y+1, 0)                     
-                self.set_y(1)  
-             else:                                              
-                self.scr.scroll(1) 
-                self.scr.move(y, 0)   
-                self.set_y(1)  
-                self.retrievebot()                            
-                self.pointtotopline(1) 
-                self.pointtobottomline(1)                                                              
-             self.scr.refresh()   
+             self.nextline()              
           elif c==curses.KEY_BACKSPACE:  
              curses.noecho() 
              if x > 0:                  
@@ -196,22 +182,18 @@ class keyhandler:
                 self.scr.scroll(-1)   
                 self.scr.move(y, x)  
                 self.set_y(-1) 
-                self.retrievetop()                               
-                self.pointtotopline(-1)   
-                self.pointtobottomline(-1)                               
+                self.retrievedata()                                                                           
              self.scr.refresh()
           elif c==curses.KEY_DOWN:
              curses.noecho()              
-             if y < self.max_y - 1:                 
+             if y < self.max_y-1:                 
                 self.scr.move(y+1, x)   
                 self.set_y(1)                                                               
              else:                                          
                 self.scr.scroll(1)                 
                 self.scr.move(y, x)  
                 self.set_y(1)   
-                self.retrievebot()                                              
-                self.pointtotopline(1) 
-                self.pointtobottomline(1)                                                 
+                self.retrievedata()                                                                                                         
              self.scr.refresh()   
           elif c==curses.KEY_LEFT: 
              curses.noecho()           
@@ -272,11 +254,10 @@ class keyhandler:
              self.scr.refresh()                                
                           
           # If the terminal window is resized, take some action 
-          elif c==curses.KEY_RESIZE: 
+          elif c==curses.KEY_RESIZE:              
              (y, x) = self.scr.getyx()  
-             (self.max_y, self.max_x) = self.scr.getmaxyx()     
-             self.scr.addstr(y, x, "You resized the terminal!" ) 
-             self.scr.addstr(y+1, x, str("Max row is now " + str(self.max_y) ) ) 
+             (self.max_y, self.max_x) = self.scr.getmaxyx()   
+             self.pagesize = self.max_y - 2               
              self.scr.refresh()     
                                                           
           # Ctrl-G quits the app                  
@@ -284,15 +265,17 @@ class keyhandler:
              break      
           # Ctrl-A prints the data in the dict 
           elif c==curses.ascii.SOH:    
-             self.display()                            
+             #self.test()                            
              #self.displaydict()    
-             #self.displaylists()                        
+             self.displaylists()                        
           elif 0<c<256:               
              c=chr(c)   
-             self.stuff += c                           
-             self.scr.refresh()  
+             if x < self.max_x-2:  
+                self.stuff += c                           
+             else:                 
+                self.nextline()                                    
              
-             
+                          
 #  Main loop       
 def main(stdscr):  
     a = keyhandler(stdscr)      
