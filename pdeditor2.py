@@ -96,8 +96,13 @@ class keyhandler:
        self.stuff = self.scr.instr(y,0, self.max_x )         
        # Remove whitespace from the end of the line 
        self.stuff = self.stuff.rstrip()         
-       self.indexlist.append(self.win_y) 
-       self.linelist.append(self.stuff)         
+       # Has the line already been entered? 
+       # If so, replace it. Otherwise, add it.  
+       if self.win_y in self.indexlist: 
+          self.linelist[self.win_y] = self.stuff 
+       else: 
+          self.indexlist.append(self.win_y) 
+          self.linelist.append(self.stuff)         
        for k, v in zip(self.indexlist, self.linelist): 
          self.data.update({k: v}) 
        # Re-set self.stuff to missing          
