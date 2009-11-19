@@ -53,7 +53,7 @@ class keyhandler:
           self.scr.scroll(1) 
           self.scr.move(y, 0)   
           self.set_y(1)  
-          self.retrievedata()          
+          self.retrievedata(self.win_y, self.win_y)                 
        self.scr.refresh()   
         
     def pageup(self): 
@@ -74,13 +74,15 @@ class keyhandler:
        # This will be the current line of the cursor plus the 
        # pagesize minus the diff between the current position and 
        # self.max_y. 
+       firstline = self.win_y + (self.pagesize - self.win_y) + 1 
+       lastline = self.win_y + self.pagesize 
        numlines = self.win_y + self.pagesize - (self.max_y - self.win_y)       
        self.scr.scroll(numlines)                 
        self.scr.move(y, x)  
        self.set_y(numlines)   
        # Note - need to change retrievedata to retrieve a range of lines
        # from the dict - not just one as at present. 
-       self.retrievedata()                
+       self.retrievedata(firstline, lastline)                 
        self.scr.refresh() 
                                   
     # Print the values of y and self.win_y.      
@@ -130,12 +132,13 @@ class keyhandler:
     # from the dict - not just one as at present.  
     # Find the number and range of lines that we need to retrieve 
     # (if any).     
-    def retrievedata(self): 
+    def retrievedata(self, startline, endline): 
        (y, x) = self.scr.getyx()         
-       if self.data.has_key(self.win_y):  
-            self.scr.addstr(y, 0, str(self.data[self.win_y] ) )                 
-       else: 
-            pass             
+       for my_y in range(startline, endline+1): 
+          if self.data.has_key(my_y):  
+               self.scr.addstr(y, 0, str(self.data[my_y] ) )                 
+          else: 
+               pass             
        self.scr.refresh() 
                             
     # Save a line of text into the dictionary.    
@@ -237,7 +240,7 @@ class keyhandler:
                 self.scr.scroll(-1)   
                 self.scr.move(y, x)  
                 self.set_y(-1) 
-                self.retrievedata()       
+                self.retrievedata(self.win_y, self.win_y)       
              else: 
                 pass                                                                                     
              self.scr.refresh()
@@ -249,8 +252,8 @@ class keyhandler:
              else:                                          
                 self.scr.scroll(1)                 
                 self.scr.move(y, x)  
-                self.set_y(1)   
-                self.retrievedata()                                                                                                         
+                self.set_y(1) 
+                self.retrievedata(self.win_y, self.win_y)                 
              self.scr.refresh()   
           elif c==curses.KEY_LEFT: 
              curses.noecho()           
