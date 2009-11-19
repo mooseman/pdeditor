@@ -67,6 +67,19 @@ class keyhandler:
           self.set_y(-self.win_y) 
        self.scr.refresh() 
        
+    # A version of pagedopwn which shows the lines that it is about 
+    # to retrieve       
+    def pagedowntemp(self):    
+       (y, x) = self.scr.getyx()  
+       (self.max_y, self.max_x) = self.scr.getmaxyx()  
+       # The number of lines is the first line plus X more. 
+       # So, this gets four lines 
+       firstline = self.win_y + 10 
+       lastline = firstline + 3 
+       self.retrievedata(firstline, lastline)                 
+       #self.scr.refresh() 
+       
+                      
     def pagedown(self): 
        (y, x) = self.scr.getyx()  
        (self.max_y, self.max_x) = self.scr.getmaxyx()  
@@ -74,15 +87,26 @@ class keyhandler:
        # This will be the current line of the cursor plus the 
        # pagesize minus the diff between the current position and 
        # self.max_y. 
-       firstline = self.win_y + (self.pagesize - self.win_y) + 1 
-       lastline = self.win_y + self.pagesize 
-       numlines = self.win_y + self.pagesize - (self.max_y - self.win_y)       
-       self.scr.scroll(numlines)                 
-       self.scr.move(y, x)  
-       self.set_y(numlines)   
+       
+       # How many lines are we from the bottom of the screen? 
+       linestobot = self.max_y - y 
+       # The first line to get will be self.win_y + linestobot + 1 
+       firstline = self.win_y + linestobot + 1 
+       # How many lines after that do we need to get? 
+       numlines = 10 
+       # The last line to get
+       lastline = firstline + numlines
+       
+       if self.win_y + 20 < self.max_y-1: 
+           self.scr.move(self.win_y+20, x)  
+           self.set_y(20) 
+       else:                          
+           self.scr.move(self.max_y-1, x)  
+           self.scr.scroll(numlines)                 
+           self.set_y(numlines)   
        # Note - need to change retrievedata to retrieve a range of lines
        # from the dict - not just one as at present. 
-       self.retrievedata(firstline, lastline)                 
+           self.retrievedata(firstline, lastline)                 
        self.scr.refresh() 
                                   
     # Print the values of y and self.win_y.      
@@ -136,7 +160,9 @@ class keyhandler:
        (y, x) = self.scr.getyx()         
        for my_y in range(startline, endline+1): 
           if self.data.has_key(my_y):  
-               self.scr.addstr(y, 0, str(self.data[my_y] ) )                 
+               self.scr.addstr(y, 0, str(self.data[my_y] ) )   
+               y = y + 1  
+               self.scr.refresh()              
           else: 
                pass             
        self.scr.refresh() 
@@ -321,7 +347,8 @@ class keyhandler:
              break      
           # Ctrl-A prints the data in the dict 
           elif c==curses.ascii.SOH:    
-             self.print_ys()                            
+             self.pagedowntemp() 
+             #self.print_ys()                            
              #self.displaydict()    
              #self.displaylists()                        
           elif 0<c<256:               
