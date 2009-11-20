@@ -81,18 +81,32 @@ class keyhandler:
     #    for y in range(4, 10): 
     #       if self.data.has_key(my_y):  
     #          self.scr.addstr(y, x, str(self.data[my_y] ) )         
-    def pagedowntemp(self):    
-       # See if we can stop the ^A from appearing 
-       self.scr.keypad(0)         
+    def pagedowntemp(self):  
+       # Get the numbers for linestomove and linestoscroll 
+       # If the pagesize is 20, for example, we may have to move
+       # down 12 lines and then scroll 8 lines. That will mean that 
+       # we retrieve 8 lines of text.          
        (y, x) = self.scr.getyx()  
        (self.max_y, self.max_x) = self.scr.getmaxyx()  
        # The number of lines is the first line plus X more. 
        # So, this gets four lines 
-       firstline = self.win_y + 10 
-       lastline = firstline + 3 
-       curses.echo()                
-       self.retrievedata(firstline, lastline)                 
-       self.scr.keypad(1)  
+       linestomove = self.max_y-1 - self.win_y 
+       linestoscroll = self.pagesize - linestomove 
+       # Select the lines of text which need to be retrieved               
+       firstline = self.bottomline+1
+       lastline = firstline + linestoscroll - 1  
+       self.scr.move(self.bottomline, x)   
+       self.scr.scroll(linestoscroll)        
+       self.set_y(self.pagesize)        
+       curses.echo()                                            
+       self.retrievedata(firstline, lastline)  
+       
+       
+       '''
+       self.scr.move(y+linestomove, 0)   
+       self.scr.scroll(linestoscroll)        
+       self.set_y(self.pagesize)  '''         
+                             
        #self.scr.refresh() 
                              
     def pagedown(self): 
@@ -178,18 +192,19 @@ class keyhandler:
     # Note - need to change retrievedata to retrieve a range of lines
     # from the dict - not just one as at present.  
     # Find the number and range of lines that we need to retrieve 
-    # (if any).     
-    def retrievedata(self, startline, endline): 
-       (y, x) = self.scr.getyx()         
-       for my_y in range(startline, endline+1): 
-          if self.data.has_key(my_y):  
-               self.scr.addstr(y, 0, str(self.data[my_y] ) )   
-               y = y + 1  
-               self.scr.refresh()              
-          else: 
-               pass             
-       self.scr.refresh() 
-                            
+    # (if any).
+    def retrievedata(self, startline, endline):
+       (y, x) = self.scr.getyx()
+       for my_y in range(startline, endline+1):
+          if self.data.has_key(my_y):
+               self.scr.addstr(y, 0, str(self.data[my_y] ) )
+               y = y + 1
+               self.scr.refresh()
+          else:
+               pass
+       self.scr.refresh()
+    
+                                
     # Save a line of text into the dictionary.    
     def saveline(self): 
        (y, x) = self.scr.getyx()  
@@ -360,7 +375,7 @@ class keyhandler:
              self.pageup()              
           # Page Down. 
           elif c==curses.KEY_NPAGE: 
-             self.pagedown() 
+             self.pagedowntemp() 
           # Function keys. Note that we have not included F1, F10 or 
           # F11 here as they are difficult to "intercept". They invoke 
           # already built-in functionality.  
