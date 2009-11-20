@@ -18,9 +18,12 @@ class keyhandler:
        self.stuff = ""        
        # A variable to save the line-number of text. 
        self.win_y = self.win_x = 0  
-       # The top line 
-                   
+       # The screen size (number of rows and columns). 
        (self.max_y, self.max_x) = self.scr.getmaxyx()
+       # The top and bottom lines. These are defined because they help 
+       # with page-up and page-down.  
+       self.topline = 0
+       self.bottomline = self.max_y - 1                            
        # Set page size (for page-up and page-down) 
        self.pagesize = self.max_y-1        
        curses.noecho() 
@@ -53,7 +56,9 @@ class keyhandler:
           self.scr.scroll(1) 
           self.scr.move(y, 0)   
           self.set_y(1)  
-          self.retrievedata(self.win_y, self.win_y)                 
+          self.retrievedata(self.win_y, self.win_y)   
+          self.pointtotopline(1) 
+          self.pointtobottomline(1)                                       
        self.scr.refresh()   
         
     def pageup(self): 
@@ -68,18 +73,28 @@ class keyhandler:
        self.scr.refresh() 
        
     # A version of pagedopwn which shows the lines that it is about 
-    # to retrieve       
+    # to retrieve     
+    # Possible other use for this - this could be extended so that 
+    # you could print the values in tabular form. 
+    # Something like this - 
+    # for x in range(5, 60, 10): 
+    #    for y in range(4, 10): 
+    #       if self.data.has_key(my_y):  
+    #          self.scr.addstr(y, x, str(self.data[my_y] ) )         
     def pagedowntemp(self):    
+       # See if we can stop the ^A from appearing 
+       self.scr.keypad(0)         
        (y, x) = self.scr.getyx()  
        (self.max_y, self.max_x) = self.scr.getmaxyx()  
        # The number of lines is the first line plus X more. 
        # So, this gets four lines 
        firstline = self.win_y + 10 
        lastline = firstline + 3 
+       curses.echo()                
        self.retrievedata(firstline, lastline)                 
+       self.scr.keypad(1)  
        #self.scr.refresh() 
-       
-                      
+                             
     def pagedown(self): 
        (y, x) = self.scr.getyx()  
        (self.max_y, self.max_x) = self.scr.getmaxyx()  
@@ -108,6 +123,14 @@ class keyhandler:
        # from the dict - not just one as at present. 
            self.retrievedata(firstline, lastline)                 
        self.scr.refresh() 
+           
+           
+    def pointtotopline(self, num): 
+       self.topline = self.topline + num   
+       
+    def pointtobottomline(self, num): 
+       self.bottomline = self.bottomline + num                   
+           
                                   
     # Print the values of y and self.win_y.      
     def print_ys(self): 
@@ -236,8 +259,39 @@ class keyhandler:
     def removechar(self): 
        (y, x) = self.scr.getyx()    
        self.scr.delch(y, x)   
-                                     
-                                         
+                               
+    # Open a file and print its contents 
+    # Note that this is here because curses.getwin(file) only opens a 
+    # file which has previously been saved using window.putwin(file) 
+    # This function here is aimed at being able to open ALL files - 
+    # however they may have been saved.      
+    def open(self, fname): 
+       (y, x) = self.scr.getyx()        
+       with open(fname) as f:
+          for line in f:
+             line = line.rstrip()    
+             self.linelist.append(line)              
+             self.indexlist.append(len(self.linelist)-1)                      
+             for k, v in zip(self.indexlist, self.linelist): 
+                 self.data.update({k: v}) 
+                 
+       for v in self.data.values(): 
+          # Maybe replace this with retrievedata. 
+          self.scr.addstr(y, 0, str(v) )   
+          y = y + 1 
+          if y < self.max_y-1:  
+             self.scr.move(y+1, 0)                     
+             self.set_y(1)  
+          else:                                              
+             self.scr.scroll(1) 
+             self.scr.move(y, 0)   
+             self.set_y(1)  
+             self.retrievedata(self.win_y, self.win_y)   
+             self.pointtotopline(1) 
+             self.pointtobottomline(1)                                       
+       self.scr.refresh()  
+          
+                                                                                          
     def action(self):  
        while (1): 
           curses.echo()                 
@@ -266,7 +320,9 @@ class keyhandler:
                 self.scr.scroll(-1)   
                 self.scr.move(y, x)  
                 self.set_y(-1) 
-                self.retrievedata(self.win_y, self.win_y)       
+                self.retrievedata(self.win_y, self.win_y)    
+                self.pointtotopline(-1)   
+                self.pointtobottomline(-1)    
              else: 
                 pass                                                                                     
              self.scr.refresh()
@@ -279,7 +335,9 @@ class keyhandler:
                 self.scr.scroll(1)                 
                 self.scr.move(y, x)  
                 self.set_y(1) 
-                self.retrievedata(self.win_y, self.win_y)                 
+                self.retrievedata(self.win_y, self.win_y)  
+                self.pointtotopline(1) 
+                self.pointtobottomline(1)                  
              self.scr.refresh()   
           elif c==curses.KEY_LEFT: 
              curses.noecho()           
@@ -323,9 +381,7 @@ class keyhandler:
           elif c==curses.KEY_F7: 
              self.displaydict() 
           elif c==curses.KEY_F8: 
-             (y, x) = self.scr.getyx()   
-             self.scr.addstr(y, x, "You pressed F8!" )               
-             self.scr.refresh()                                
+             self.open("test.txt")              
           elif c==curses.KEY_F9: 
              (y, x) = self.scr.getyx()   
              self.scr.addstr(y, x, "You pressed F9!" )               
@@ -346,11 +402,11 @@ class keyhandler:
           elif c==curses.ascii.BEL: 
              break      
           # Ctrl-A prints the data in the dict 
-          elif c==curses.ascii.SOH:    
-             self.pagedowntemp() 
+          elif c==curses.ascii.SOH:               
+             #self.pagedowntemp() 
              #self.print_ys()                            
              #self.displaydict()    
-             #self.displaylists()                        
+             self.displaylists()                        
           elif 0<c<256:               
              c=chr(c)   
              if x < self.max_x-2:  
