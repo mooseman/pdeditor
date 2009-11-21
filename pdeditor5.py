@@ -61,7 +61,7 @@ class keyhandler:
           self.scr.scroll(1) 
           self.scr.move(y, 0)   
           self.set_y(1)  
-          self.retrievedata(self.win_y, self.win_y)   
+          self.retrievedata(self.win_y) 
           self.pointtotopline(1) 
           self.pointtobottomline(1)                                       
        self.scr.refresh()   
@@ -95,16 +95,22 @@ class keyhandler:
        (self.max_y, self.max_x) = self.scr.getmaxyx()  
        # The number of lines is the first line plus X more. 
        # So, this gets four lines 
-       linestomove = self.max_y-1 - self.win_y 
+       linestomove = self.max_y-1 - y 
        linestoscroll = self.pagesize - linestomove 
        # Select the lines of text which need to be retrieved               
-       firstline = self.bottomline+1
-       lastline = firstline + linestoscroll - 1  
-       self.scr.move(self.bottomline, x)   
-       self.scr.scroll(linestoscroll)        
-       self.set_y(self.pagesize)        
+       firstline = self.bottomline
+       lastline = firstline + linestoscroll   
+       
+       for line in range(y, self.bottomline-1):  
+           self.scr.move(line, x) 
+           self.set_y(1)    
+       
        curses.echo()                                            
-       self.retrievedata(firstline, lastline)  
+       for line in range(firstline, lastline): 
+          self.set_y(1)        
+          self.scr.scroll(1)        
+          self.retrievedata(line) 
+          self.scr.refresh() 
        
        
        '''
@@ -198,15 +204,12 @@ class keyhandler:
     # from the dict - not just one as at present.  
     # Find the number and range of lines that we need to retrieve 
     # (if any).
-    def retrievedata(self, startline, endline):
+    def retrievedata(self, line):
        (y, x) = self.scr.getyx()
-       for my_y in range(startline, endline+1):
-          if self.data.has_key(my_y):
-               self.scr.addstr(y, 0, str(self.data[my_y] ) )
-               y = y + 1
-               self.scr.refresh()
-          else:
-               pass
+       if self.data.has_key(line):
+          self.scr.addstr(y, 0, str(self.data[line] ) )
+       else:
+          pass
        self.scr.refresh()
     
                                 
@@ -306,7 +309,7 @@ class keyhandler:
              self.scr.scroll(1) 
              self.scr.move(y, 0)   
              self.set_y(1)  
-             self.retrievedata(self.win_y, self.win_y)   
+             self.retrievedata(self.win_y) 
              self.pointtotopline(1) 
              self.pointtobottomline(1)                                       
        self.scr.refresh()  
@@ -385,22 +388,30 @@ class keyhandler:
    
    
     # Create a macro to record the user's actions. 
-    def macro(self):     
-       if self.macroflag == 0: 
-          self.macroflag = 1 
-       elif self.macroflag == 1: 
-          self.macroflag = 0                     
-    
+    def macro(self):   
+       c=self.scr.getch() 
+      
+       if c==curses.KEY_F5: 
+          if self.macroflag == 0: 
+             self.macroflag = 1 
+             self.scr.addstr(5, 20, str("Macro recording started.") )  
+          elif self.macroflag == 1: 
+             self.macroflag = 0    
+             self.scr.addstr(15, 20, str("Macro recording stopped.") )                                                        
+       
+       
+       #while c != curses.KEY_F5: 
        if self.macroflag == 1: 
-          self.scr.addstr(5, 20, str("Macro recording started.") ) 
-          self.scr.refresh()     
           # Record the macro as long as the end-record key is not pressed
-          c=self.scr.getch()  # Get a keystroke  
-          self.macrotext + str(c) 
-       else: 
-          self.scr.addstr(15, 20, str("Macro recording stopped.") )    
-          self.scr.addstr(17, 20, "" + self.macrotext + "" )   
+          #c=self.scr.getch()  # Get a keystroke  
+          myc = curses.ascii.unctrl(c)                                 
+          self.macrotext += str(myc)                         
+          self.scr.addstr(17, 20, self.macrotext )   
           self.scr.refresh()  
+       else:           
+          self.myval = self.macrotext 
+          self.scr.addstr(17, 20, str(self.myval) )   
+          self.scr.refresh() 
        
                      
                     
@@ -433,7 +444,7 @@ class keyhandler:
                 self.scr.scroll(-1)   
                 self.scr.move(y, x)  
                 self.set_y(-1) 
-                self.retrievedata(self.win_y, self.win_y)    
+                self.retrievedata(self.win_y) 
                 self.pointtotopline(-1)   
                 self.pointtobottomline(-1)    
              else: 
@@ -448,7 +459,7 @@ class keyhandler:
                 self.scr.scroll(1)                 
                 self.scr.move(y, x)  
                 self.set_y(1) 
-                self.retrievedata(self.win_y, self.win_y)  
+                self.retrievedata(self.win_y) 
                 self.pointtotopline(1) 
                 self.pointtobottomline(1)                  
              self.scr.refresh()   
@@ -524,7 +535,7 @@ class keyhandler:
           # Ctrl-A prints the data in the dict 
           elif c==curses.ascii.SOH:               
              (y, x) = self.scr.getyx()   
-             self.scr.addstr(y, x, str(self.macro) )               
+             self.scr.addstr(y, x, str(self.myval) )               
              self.scr.refresh() 
              #self.pagedowntemp() 
              #self.print_ys()                            
