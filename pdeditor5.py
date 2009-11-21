@@ -25,7 +25,10 @@ class keyhandler:
        self.topline = 0
        self.bottomline = self.max_y - 1                            
        # Set page size (for page-up and page-down) 
-       self.pagesize = self.max_y-1        
+       self.pagesize = self.max_y-1      
+       # Set the macro status flag 
+       self.macroflag = 0 
+                       
        curses.noecho() 
        self.scr.keypad(1)            
        self.scr.scrollok(1)
@@ -305,6 +308,7 @@ class keyhandler:
              self.pointtotopline(1) 
              self.pointtobottomline(1)                                       
        self.scr.refresh()  
+   
         
     # Create a popup window to get input from user         
     def popup(self): 
@@ -332,7 +336,7 @@ class keyhandler:
           elif c==curses.KEY_UP: 
              curses.noecho()           
              (y, x) = popup.getyx()                
-             if y > 0:  
+             if y > 1:  
                 popup.move(y-1, x)               
              else: 
                 pass      
@@ -342,7 +346,7 @@ class keyhandler:
              curses.noecho()           
              (y, x) = popup.getyx()   
              (max_y, max_x) = popup.getmaxyx()  
-             if y < max_y-1: 
+             if y < max_y-2: 
                 popup.move(y+1, x)               
              else: 
                 pass
@@ -351,7 +355,7 @@ class keyhandler:
           elif c==curses.KEY_LEFT: 
              curses.noecho()           
              (y, x) = popup.getyx()    
-             if x>0: 
+             if x>1: 
                 popup.move(y, x-1)               
              else: 
                 pass
@@ -361,20 +365,44 @@ class keyhandler:
              curses.noecho()           
              (y, x) = popup.getyx()    
              (max_y, max_x) = popup.getmaxyx()  
-             if x < max_x-1: 
+             if x < max_x-2: 
                 popup.move(y, x+1)               
              else: 
                 pass
              curses.echo()                                      
              popup.refresh()                                                                  
           elif 0<c<256: 
-             curses.echo() 
-             c=chr(c)  
+             if 1<y<max_y-2 and 1<x<max_x-2:  
+                curses.echo() 
+                c=chr(c)  
+             else: 
+                pass                  
           else: 
              pass 		                    
        self.scr.refresh()                                
-           
-                                                                                                                                                   
+   
+   
+    # Create a macro to record the user's actions. 
+    def macro(self):               
+       self.scr.addstr(14, 20, str("Macro recording started.") )    
+       # Record the macro as long as the end-record key is not pressed
+       c=self.scr.getch()  # Get a keystroke                
+       if c != curses.KEY_F5:  
+          self.macroname = "test" 
+          self.macrotext = ""
+          # do stuff           
+          self.macrotext + str(c) 
+          # If end-record key is pressed, stop recording and quit the 
+          # macro.              
+       elif c == curses.KEY_F5: 
+          self.scr.addstr(15, 20, str("Macro recording stopped.") )    
+          self.scr.addstr(17, 20, "" + self.macrotext + "" )   
+          self.scr.refresh()  
+          self.macroflag = 0 
+       self.scr.refresh()    
+       
+                    
+                                                                                                                                                                             
     def action(self):  
        while (1): 
           curses.echo()                 
@@ -454,17 +482,26 @@ class keyhandler:
              self.deleteline()              
              self.scr.refresh()  
           elif c==curses.KEY_F4: 
-             (y, x) = self.scr.getyx()   
+             pass 
+             
+             '''(y, x) = self.scr.getyx()   
              self.scr.addstr(y, x, "You pressed F4!" )               
-             self.scr.refresh()  
+             self.scr.refresh() '''  
           elif c==curses.KEY_F5: 
-             self.display()                                       
+             self.macro()              
           elif c==curses.KEY_F6: 
-             self.displaylists() 
+          
+             pass 
+             #self.displaylists() 
           elif c==curses.KEY_F7: 
-             self.displaydict() 
+          
+             pass
+             #self.displaydict() 
           elif c==curses.KEY_F8: 
-             self.open("test.txt")              
+          
+          
+             pass         
+             #self.open("test.txt")              
           elif c==curses.KEY_F9: 
              self.popup()              
           elif c==curses.KEY_F12: 
@@ -484,10 +521,13 @@ class keyhandler:
              break      
           # Ctrl-A prints the data in the dict 
           elif c==curses.ascii.SOH:               
+             (y, x) = self.scr.getyx()   
+             self.scr.addstr(y, x, str(self.macro) )               
+             self.scr.refresh() 
              #self.pagedowntemp() 
              #self.print_ys()                            
              #self.displaydict()    
-             self.displaylists()                        
+             #self.displaylists()                        
           elif 0<c<256:               
              c=chr(c)   
              if x < self.max_x-2:  
