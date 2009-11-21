@@ -99,7 +99,8 @@ class keyhandler:
        linestoscroll = self.pagesize - linestomove 
        # Select the lines of text which need to be retrieved               
        firstline = self.bottomline
-       lastline = firstline + linestoscroll   
+       #lastline = firstline + linestoscroll + linestomove  
+       lastline = firstline + self.pagesize 
        
        for line in range(y, self.bottomline-1):  
            self.scr.move(line, x) 
@@ -110,7 +111,7 @@ class keyhandler:
           self.set_y(1)        
           self.scr.scroll(1)        
           self.retrievedata(line) 
-          self.scr.refresh() 
+       self.scr.refresh() 
        
        
        '''
