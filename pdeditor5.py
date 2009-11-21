@@ -335,7 +335,8 @@ class keyhandler:
              if y > 0:  
                 popup.move(y-1, x)               
              else: 
-                pass                 
+                pass      
+             curses.echo()               
              popup.refresh()                     
           elif c==curses.KEY_DOWN: 
              curses.noecho()           
@@ -344,7 +345,8 @@ class keyhandler:
              if y < max_y-1: 
                 popup.move(y+1, x)               
              else: 
-                pass                 
+                pass
+             curses.echo()                     
              popup.refresh()  
           elif c==curses.KEY_LEFT: 
              curses.noecho()           
@@ -352,7 +354,8 @@ class keyhandler:
              if x>0: 
                 popup.move(y, x-1)               
              else: 
-                pass                 
+                pass
+             curses.echo()                     
              popup.refresh()  
           elif c==curses.KEY_RIGHT: 
              curses.noecho()           
@@ -361,7 +364,8 @@ class keyhandler:
              if x < max_x-1: 
                 popup.move(y, x+1)               
              else: 
-                pass                                  
+                pass
+             curses.echo()                                      
              popup.refresh()                                                                  
           elif 0<c<256: 
              curses.echo() 
