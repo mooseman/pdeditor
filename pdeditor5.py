@@ -28,6 +28,8 @@ class keyhandler:
        self.pagesize = self.max_y-1      
        # Set the macro status flag 
        self.macroflag = 0 
+       self.macrotext = ""
+       
                        
        curses.noecho() 
        self.scr.keypad(1)            
@@ -383,31 +385,31 @@ class keyhandler:
    
    
     # Create a macro to record the user's actions. 
-    def macro(self):               
-       self.scr.addstr(14, 20, str("Macro recording started.") )    
-       # Record the macro as long as the end-record key is not pressed
-       c=self.scr.getch()  # Get a keystroke                
-       if c != curses.KEY_F5:  
-          self.macroname = "test" 
-          self.macrotext = ""
-          # do stuff           
+    def macro(self):     
+       if self.macroflag == 0: 
+          self.macroflag = 1 
+       elif self.macroflag == 1: 
+          self.macroflag = 0                     
+    
+       if self.macroflag == 1: 
+          self.scr.addstr(5, 20, str("Macro recording started.") ) 
+          self.scr.refresh()     
+          # Record the macro as long as the end-record key is not pressed
+          c=self.scr.getch()  # Get a keystroke  
           self.macrotext + str(c) 
-          # If end-record key is pressed, stop recording and quit the 
-          # macro.              
-       elif c == curses.KEY_F5: 
+       else: 
           self.scr.addstr(15, 20, str("Macro recording stopped.") )    
           self.scr.addstr(17, 20, "" + self.macrotext + "" )   
           self.scr.refresh()  
-          self.macroflag = 0 
-       self.scr.refresh()    
        
+                     
                     
                                                                                                                                                                              
     def action(self):  
        while (1): 
           curses.echo()                 
           (y, x) = self.scr.getyx()   
-          c=self.scr.getch()		# Get a keystroke               
+          c=self.scr.getch()		# Get a keystroke                         
           if c in (curses.KEY_ENTER, 10):  
              self.nextline()              
           elif c==curses.KEY_BACKSPACE:  
@@ -488,7 +490,7 @@ class keyhandler:
              self.scr.addstr(y, x, "You pressed F4!" )               
              self.scr.refresh() '''  
           elif c==curses.KEY_F5: 
-             self.macro()              
+             self.macro()               
           elif c==curses.KEY_F6: 
           
              pass 
