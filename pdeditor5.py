@@ -26,11 +26,13 @@ class keyhandler:
        self.bottomline = self.max_y - 1                            
        # Set page size (for page-up and page-down) 
        self.pagesize = self.max_y-1      
-       # Set the macro status flag 
+       # Set macro status flag and other macro variables 
        self.macroflag = 0 
        self.macrotext = ""
+       self.cursorposlist = [] 
+       self.macrolist = []
        
-                       
+                                     
        curses.noecho() 
        self.scr.keypad(1)            
        self.scr.scrollok(1)
@@ -390,43 +392,40 @@ class keyhandler:
     # Create a macro to record the user's actions. 
     def macro(self):   
        c=self.scr.getch() 
-      
-       if c==curses.KEY_F5: 
-          if self.macroflag == 0: 
-             self.macroflag = 1 
-             self.scr.addstr(14, 20, str("Macro recording started.") )  
-          elif self.macroflag == 1: 
-             self.macroflag = 0    
-             self.scr.addstr(15, 20, str("Macro recording stopped.") )                                                        
-       
-       
+             
+       if self.macroflag == 0: 
+          self.macroflag = 1 
+          self.scr.addstr(14, 20, str("Macro recording started.") )  
+       elif self.macroflag == 1: 
+          self.macroflag = 0    
+          self.scr.addstr(15, 20, str("Macro recording stopped.") )                                                        
+              
        #while c != curses.KEY_F5: 
        if self.macroflag == 1: 
-          # Record the macro as long as the end-record key is not pressed
-          #c=self.scr.getch()  # Get a keystroke  
-          myc = curses.ascii.unctrl(c)                                 
-          self.macrotext += str(myc)                         
-          #self.scr.addstr(17, 20, self.macrotext )   
-          #self.scr.refresh()  
-       else:           
-          self.myval = self.macrotext 
-          self.scr.addstr(17, 20, str(self.myval) )   
+          pass 
+          
+       else:                     
+          self.scr.addstr(2, 5, str(self.cursorposlist) )   
+          self.scr.addstr(8, 5, str(self.macrolist) )                                               
           self.scr.refresh() 
-       
-                     
-                    
+                                                
                                                                                                                                                                              
     def action(self):  
        while (1): 
           curses.echo()                 
           (y, x) = self.scr.getyx()   
-          c=self.scr.getch()		# Get a keystroke          
-          # Test to see if we are recording a macro or not. 
+          c=self.scr.getch()		# Get a keystroke    
+          # See if we are recording a macro 
           if self.macroflag == 1: 
-             self.macro() 
+             (y, x) = self.scr.getyx()   
+             myc = curses.ascii.unctrl(c)  
+             cursorpos = (y, x)                                                
+             self.macrotext += str(myc)  
+             self.cursorposlist.append(cursorpos) 
+             self.macrolist.append(str(myc))              
           else: 
-             pass              
-                                  
+             pass 
+                                                                            
           if c in (curses.KEY_ENTER, 10):  
              self.nextline()              
           elif c==curses.KEY_BACKSPACE:  
