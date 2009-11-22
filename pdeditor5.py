@@ -395,15 +395,14 @@ class keyhandler:
              
        if self.macroflag == 0: 
           self.macroflag = 1 
-          self.scr.addstr(14, 20, str("Macro recording started.") )  
+          self.scr.addstr(1, 5, str("Macro recording started.") )  
        elif self.macroflag == 1: 
           self.macroflag = 0    
-          self.scr.addstr(15, 20, str("Macro recording stopped.") )                                                        
+          self.scr.addstr(2, 5, str("Macro recording stopped.") )                                                        
               
        #while c != curses.KEY_F5: 
        if self.macroflag == 1: 
           pass 
-          
        else:                     
           self.scr.addstr(2, 5, str(self.cursorposlist) )   
           self.scr.addstr(8, 5, str(self.macrolist) )                                               
@@ -417,12 +416,12 @@ class keyhandler:
           c=self.scr.getch()		# Get a keystroke    
           # See if we are recording a macro 
           if self.macroflag == 1: 
-             (y, x) = self.scr.getyx()   
-             myc = curses.ascii.unctrl(c)  
-             cursorpos = (y, x)                                                
-             self.macrotext += str(myc)  
-             self.cursorposlist.append(cursorpos) 
-             self.macrolist.append(str(myc))              
+             (y, x) = self.scr.getyx()
+             myc = curses.ascii.unctrl(c)
+             cursorpos = (y, x)
+             self.macrotext += str(myc)
+             self.cursorposlist.append(cursorpos)
+             self.macrolist.append(str(myc))                                      
           else: 
              pass 
                                                                             
