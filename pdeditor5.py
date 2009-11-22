@@ -390,17 +390,15 @@ class keyhandler:
    
    
     # Create a macro to record the user's actions. 
-    def macro(self):   
-       c=self.scr.getch() 
-             
+    def macro(self):                       
        if self.macroflag == 0: 
           self.macroflag = 1 
           self.scr.addstr(1, 5, str("Macro recording started.") )  
+          self.scr.move(0, 0)    
        elif self.macroflag == 1: 
           self.macroflag = 0    
           self.scr.addstr(2, 5, str("Macro recording stopped.") )                                                        
-              
-       #while c != curses.KEY_F5: 
+                    
        if self.macroflag == 1: 
           pass 
        else:                     
