@@ -86,40 +86,38 @@ class keyhandler:
     #    for y in range(4, 10): 
     #       if self.data.has_key(my_y):  
     #          self.scr.addstr(y, x, str(self.data[my_y] ) )         
-    def pagedowntemp(self):  
-       # Get the numbers for linestomove and linestoscroll 
+    
+    def pagedowntemp(self):
+       # Get the numbers for linestomove and linestoscroll
        # If the pagesize is 20, for example, we may have to move
-       # down 12 lines and then scroll 8 lines. That will mean that 
-       # we retrieve 8 lines of text.          
-       (y, x) = self.scr.getyx()  
-       (self.max_y, self.max_x) = self.scr.getmaxyx()  
-       # The number of lines is the first line plus X more. 
-       # So, this gets four lines 
-       linestomove = self.max_y-1 - y 
-       linestoscroll = self.pagesize - linestomove 
-       # Select the lines of text which need to be retrieved               
+       # down 12 lines and then scroll 8 lines. That will mean that
+       # we retrieve 8 lines of text.
+              
+       (y, x) = self.scr.getyx()
+       (self.max_y, self.max_x) = self.scr.getmaxyx()
+       # The number of lines is the first line plus X more.
+       # So, this gets four lines
+       linestomove = self.max_y-1 - y
+       linestoscroll = self.pagesize - linestomove
+       # Select the lines of text which need to be retrieved
        firstline = self.bottomline
-       #lastline = firstline + linestoscroll + linestomove  
-       lastline = firstline + self.pagesize 
+       #lastline = firstline + linestoscroll + linestomove
+       lastline = firstline + self.pagesize
        
-       for line in range(y, self.bottomline-1):  
-           self.scr.move(line, x) 
-           self.set_y(1)    
+       for line in range(y, self.bottomline-1):
+           self.scr.move(line, x)
+           self.set_y(1)
        
-       curses.echo()                                            
-       for line in range(firstline, lastline): 
-          self.set_y(1)        
-          self.scr.scroll(1)        
-          self.retrievedata(line) 
-       self.scr.refresh() 
+       curses.echo()
+       for line in range(firstline, lastline):
+          self.scr.scroll(1)  
+          self.set_y(1)          
+          self.pointtotopline(1) 
+          self.pointtobottomline(1)   
+          self.retrievedata(line)                     
+       self.scr.refresh()
        
-       
-       '''
-       self.scr.move(y+linestomove, 0)   
-       self.scr.scroll(linestoscroll)        
-       self.set_y(self.pagesize)  '''         
-                             
-       #self.scr.refresh() 
+    
                              
     def pagedown(self): 
        (y, x) = self.scr.getyx()  
@@ -440,7 +438,7 @@ class keyhandler:
              curses.noecho()                
              if y > 0:                                   
                 self.scr.move(y-1, x)                    
-                self.set_y(-1)                                                    
+                self.set_y(-1)                   
              elif y == 0 and self.win_y > 0:   
                 self.scr.scroll(-1)   
                 self.scr.move(y, x)  
@@ -465,12 +463,18 @@ class keyhandler:
                 self.pointtobottomline(1)                  
              self.scr.refresh()   
           elif c==curses.KEY_LEFT: 
-             curses.noecho()           
-             self.scr.move(y, x-1) 
+             curses.noecho()  
+             if x > 0: 
+                self.scr.move(y, x-1) 
+             else: 
+                pass 
              self.scr.refresh()
           elif c==curses.KEY_RIGHT: 
              curses.noecho() 
-             self.scr.move(y, x+1) 
+             if x < self.max_x-1:
+                self.scr.move(y, x+1) 
+             else: 
+                pass                 
              self.scr.refresh() 
           elif c==curses.KEY_HOME: 
              curses.noecho() 
