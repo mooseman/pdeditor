@@ -97,12 +97,13 @@ class keyhandler:
        (self.max_y, self.max_x) = self.scr.getmaxyx()
        # The number of lines is the first line plus X more.
        # So, this gets four lines
+       linesfromtop = y 
        linestomove = self.max_y-1 - y
        linestoscroll = self.pagesize - linestomove
        # Select the lines of text which need to be retrieved
        firstline = self.bottomline
        #lastline = firstline + linestoscroll + linestomove
-       lastline = firstline + self.pagesize
+       lastline = firstline + self.pagesize 
        
        for line in range(y, self.bottomline-1):
            self.scr.move(line, x)
@@ -393,7 +394,7 @@ class keyhandler:
        if c==curses.KEY_F5: 
           if self.macroflag == 0: 
              self.macroflag = 1 
-             self.scr.addstr(5, 20, str("Macro recording started.") )  
+             self.scr.addstr(14, 20, str("Macro recording started.") )  
           elif self.macroflag == 1: 
              self.macroflag = 0    
              self.scr.addstr(15, 20, str("Macro recording stopped.") )                                                        
@@ -405,8 +406,8 @@ class keyhandler:
           #c=self.scr.getch()  # Get a keystroke  
           myc = curses.ascii.unctrl(c)                                 
           self.macrotext += str(myc)                         
-          self.scr.addstr(17, 20, self.macrotext )   
-          self.scr.refresh()  
+          #self.scr.addstr(17, 20, self.macrotext )   
+          #self.scr.refresh()  
        else:           
           self.myval = self.macrotext 
           self.scr.addstr(17, 20, str(self.myval) )   
@@ -419,7 +420,13 @@ class keyhandler:
        while (1): 
           curses.echo()                 
           (y, x) = self.scr.getyx()   
-          c=self.scr.getch()		# Get a keystroke                         
+          c=self.scr.getch()		# Get a keystroke          
+          # Test to see if we are recording a macro or not. 
+          if self.macroflag == 1: 
+             self.macro() 
+          else: 
+             pass              
+                                  
           if c in (curses.KEY_ENTER, 10):  
              self.nextline()              
           elif c==curses.KEY_BACKSPACE:  
