@@ -52,11 +52,12 @@ class crosstab(object):
       it = list(it)
       return it[1:]          
                    
-   def test(self):       
-      i = range(0, 2)
-      j = int([len(list) for list in self.test]) 
-      for k, v in self.head(self.test[i][0]), self.tail(self.test[i][1:]): 
-         self.mydict.update({k: v})                  
+   def test(self): 
+      self.test = zip(*self.mylist)   
+      self.foo = list(self.test[0][0], self.test[1][0], self.test[2][0]) 
+      print self.foo
+      #print self.bar 
+      
                                                                                                            
    def display(self): 
       #print self.mylist
@@ -93,7 +94,8 @@ a.init()
 a.read('testdata.csv') 
 a.head(["foo", "bar", "baz"]) 
 a.tail(["foo", "bar", "baz"]) 
-a.display3()      
+a.test() 
+#a.display5()      
 
 
       
