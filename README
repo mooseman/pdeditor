@@ -1,24 +1,25 @@
 
 ***  README *** 
 
- This is a very simple Python text editor using curses. 
- It is now at beta stage.  
+ Two simple public-domain text editors - one in Python and 
+ the other in C.  
+ 
+*** STATUS (as at 24th Nov 2010) ***
+ Python - beta stage. Scrolling works. Still need to 
+ implement page-up and page-down.   
+ 
+ C - alpha.  Scrolling not yet working. Still need to 
+ implement page-up and page-down.  
 
- ** Good news! **  Scrolling now works perfectly!  Still have to implement 
-page-up and page-down, but text now scrolls as expected when 
-you scroll at the top or bottom of the page.     
-
- The key-bindings are as follows - 
+ The key-bindings are as follows (Python editor) - 
   
 Keystroke 	Action
-Home  	        Go to left edge of window.
-End  	        Go to right edge of window.
-Ctrl-A              Print the contents of the data dictionary  
-Ctrl-G 	        Exit the editor.  
-
-F2                   Insert line 
-F3                   Delete line 
-
+Home  	    Go to left edge of window.
+End  	    Go to right edge of window.
+Ctrl-A      Print the contents of the data dictionary  
+Ctrl-G 	    Exit the editor.  
+F2          Insert line 
+F3          Delete line 
 
 
  As usual, the code is public-domain... "share and enjoy....."  :)  
