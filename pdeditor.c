@@ -1,9 +1,11 @@
 
 
-/*  pdeditor.c                                   */  
-/*  A simple text-editor in C                    */ 
-/*  This code is released to the public domain.  */ 
-/*  "Share and enjoy..."  ;)                     */ 
+/*  pdeditor.c                                    */  
+/*  A simple text-editor in C                     */ 
+/*  Remember to compile this code with the        */ 
+/*  -lncurses option. This links it with curses.  */  
+/*  This code is released to the public domain.   */ 
+/*  "Share and enjoy..."  ;)                      */ 
 
 
 #include <stdio.h>
@@ -16,13 +18,22 @@
 /* Declare our window  */ 
    WINDOW *mywin;  
 
-/* Number of rows and cols */ 
+/* The row and column of the cursor, and the number of */ 
+/* rows and cols in the window. */  
 int r, c, nrows, ncols;  
+
+/* An array to hold the contents of a line */ 
+/* Note - need to make sure that if you insert text which makes the line */
+/* longer than 80 chars, then a new line array is created and text added */ 
+/* to it. */ 
+char text[80];  
 
 /*  Character read from keyboard. */ 
 /*  Note - make sure this is an INT variable. */ 
 int ch; 
 
+/*  Set insert mode to zero when we start. */ 
+int insmode = 0; 
 
 /* Move to the beginning of the next line */ 
 void nextline() 
@@ -37,7 +48,6 @@ void delchar()
    delch();   
    refresh();             
 }     
-
 
 
 void up()
@@ -80,6 +90,31 @@ void backspace()
   refresh();       
 }     
     
+int insert() 
+{    
+   if (insmode == 0) insmode = 1; 
+   else if (insmode == 1) insmode = 0;        
+   return insmode; 
+}     
+
+
+void put(int ch)
+{   
+   getyx(mywin, r, c); 
+   if (insmode == 0) addch(ch);    
+   else if (insmode == 1) insch(ch); 
+   refresh();     
+}     
+
+
+void test() 
+{ 
+   getyx(mywin, r, c); 
+   addstr("Just a small test string..."); 
+   refresh(); 
+}     
+
+
 
 
 /*  Handle the keyboard input  */ 
@@ -94,8 +129,9 @@ void keyhandler()
   else if (ch == KEY_LEFT)    left(); 
   else if (ch == KEY_RIGHT)   right(); 
   else if (ch == KEY_UP)      up();
-  else if (ch == KEY_DOWN)    down();    
-  else addch(ch); 
+  else if (ch == KEY_DOWN)    down();     
+  else if (ch == KEY_IC)      insert();      
+  else put(ch); 
                         
 }     
 
