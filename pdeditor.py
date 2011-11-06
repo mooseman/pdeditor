@@ -11,13 +11,15 @@ import sys, math, curses, curses.ascii, traceback, string, os
 class keyhandler:
     def __init__(self, scr): 
        self.scr = scr                       
-       # Dictionary to store our data in.   
-       self.data = {}           
-       self.indexlist = [] 
-       self.linelist = []            
+       # Dictionary to store our data in. This uses the line-number as 
+       # the key, and the line text as the data.    
+       self.data = {}      
+       
        self.stuff = ""        
+       
        # A variable to save the line-number of text. 
        self.win_y = self.win_x = 0  
+       
        # The screen size (number of rows and columns). 
        (self.max_y, self.max_x) = self.scr.getmaxyx()
        # The top and bottom lines. These are defined because they help 
